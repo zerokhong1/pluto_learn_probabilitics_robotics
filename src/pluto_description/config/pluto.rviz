@@ -1,0 +1,34 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+  - Class: rviz_common/Views
+    Name: Views
+Visualization Manager:
+  Displays:
+    - Class: rviz_default_plugins/RobotModel
+      Name: RobotModel
+      Enabled: true
+      Topic: /robot_description
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: true
+    - Class: rviz_default_plugins/LaserScan
+      Name: LaserScan
+      Enabled: true
+      Topic: /scan
+    - Class: rviz_default_plugins/MarkerArray
+      Name: BeliefMarkers
+      Enabled: true
+      Topic: /pluto/belief_markers
+    - Class: rviz_default_plugins/Marker
+      Name: EyeState
+      Enabled: true
+      Topic: /pluto/eye_marker
+  Global Options:
+    Fixed Frame: base_footprint
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 3.5
+      Pitch: 0.4
+      Yaw: 0.8

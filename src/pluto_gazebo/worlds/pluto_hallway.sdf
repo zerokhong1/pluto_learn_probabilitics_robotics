@@ -1,0 +1,313 @@
+<?xml version="1.0"?>
+<!--
+  Gazebo Harmonic (gz-sim 8.x) world for Chapter 2 demo.
+  Contains: hallway 10m × 2m with 3 doors + Pluto robot (SDF model inline).
+-->
+<sdf version="1.9">
+  <world name="pluto_hallway">
+
+    <!-- ==================== Plugins ==================== -->
+    <plugin filename="gz-sim-physics-system"      name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system"       name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <plugin filename="gz-sim-contact-system"       name="gz::sim::systems::Contact"/>
+
+    <!-- ==================== Environment ==================== -->
+    <gravity>0 0 -9.81</gravity>
+
+    <light type="directional" name="sun">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.3 0.3 0.3 1</specular>
+      <direction>-0.4 0.1 -0.9</direction>
+    </light>
+
+    <!-- Ground -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>25 10</size></plane></geometry>
+          <surface><friction><ode><mu>1</mu><mu2>1</mu2></ode></friction></surface>
+        </collision>
+        <visual name="visual">
+          <geometry><plane><normal>0 0 1</normal><size>25 10</size></plane></geometry>
+          <material>
+            <ambient>0.85 0.85 0.85 1</ambient>
+            <diffuse>0.85 0.85 0.85 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- ==================== Hallway walls ==================== -->
+    <!-- Left wall (y = +1.0) -->
+    <model name="left_wall">
+      <static>true</static>
+      <pose>5 1.05 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>10 0.1 2.0</size></box></geometry></collision>
+        <visual name="v">
+          <geometry><box><size>10 0.1 2.0</size></box></geometry>
+          <material><ambient>0.72 0.72 0.8 1</ambient><diffuse>0.72 0.72 0.8 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Right wall (y = -1.0) -->
+    <model name="right_wall">
+      <static>true</static>
+      <pose>5 -1.05 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>10 0.1 2.0</size></box></geometry></collision>
+        <visual name="v">
+          <geometry><box><size>10 0.1 2.0</size></box></geometry>
+          <material><ambient>0.72 0.72 0.8 1</ambient><diffuse>0.72 0.72 0.8 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Start cap -->
+    <model name="start_wall">
+      <static>true</static>
+      <pose>0 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.1 2.1 2.0</size></box></geometry></collision>
+        <visual name="v">
+          <geometry><box><size>0.1 2.1 2.0</size></box></geometry>
+          <material><ambient>0.72 0.72 0.8 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- End cap -->
+    <model name="end_wall">
+      <static>true</static>
+      <pose>10 0 1.0 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.1 2.1 2.0</size></box></geometry></collision>
+        <visual name="v">
+          <geometry><box><size>0.1 2.1 2.0</size></box></geometry>
+          <material><ambient>0.72 0.72 0.8 1</ambient></material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Door markers (openings in left wall at x=2, 5, 8) — brown frames -->
+    <model name="door_1_left">  <static>true</static>  <pose>1.4 1.05 1.0 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>1.2 0.1 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.2 0.1 2.0</size></box></geometry><material><ambient>0.72 0.72 0.8 1</ambient></material></visual></link></model>
+    <model name="door_1_right"> <static>true</static>  <pose>2.6 1.05 1.0 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>1.2 0.1 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.2 0.1 2.0</size></box></geometry><material><ambient>0.72 0.72 0.8 1</ambient></material></visual></link></model>
+
+    <model name="door_2_left">  <static>true</static>  <pose>4.4 1.05 1.0 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>1.2 0.1 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.2 0.1 2.0</size></box></geometry><material><ambient>0.72 0.72 0.8 1</ambient></material></visual></link></model>
+    <model name="door_2_right"> <static>true</static>  <pose>5.6 1.05 1.0 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>1.2 0.1 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.2 0.1 2.0</size></box></geometry><material><ambient>0.72 0.72 0.8 1</ambient></material></visual></link></model>
+
+    <model name="door_3_left">  <static>true</static>  <pose>7.4 1.05 1.0 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>1.2 0.1 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.2 0.1 2.0</size></box></geometry><material><ambient>0.72 0.72 0.8 1</ambient></material></visual></link></model>
+    <model name="door_3_right"> <static>true</static>  <pose>8.6 1.05 1.0 0 0 0</pose>
+      <link name="l"><collision name="c"><geometry><box><size>1.2 0.1 2.0</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>1.2 0.1 2.0</size></box></geometry><material><ambient>0.72 0.72 0.8 1</ambient></material></visual></link></model>
+
+    <!-- Door frames (brown visual markers) -->
+    <model name="frame_1"><static>true</static><pose>2.0 1.0 0.5 0 0 0</pose>
+      <link name="l"><visual name="v"><geometry><box><size>0.08 0.12 1.0</size></box></geometry>
+        <material><ambient>0.45 0.28 0.1 1</ambient><diffuse>0.45 0.28 0.1 1</diffuse></material></visual></link></model>
+    <model name="frame_2"><static>true</static><pose>5.0 1.0 0.5 0 0 0</pose>
+      <link name="l"><visual name="v"><geometry><box><size>0.08 0.12 1.0</size></box></geometry>
+        <material><ambient>0.45 0.28 0.1 1</ambient><diffuse>0.45 0.28 0.1 1</diffuse></material></visual></link></model>
+    <model name="frame_3"><static>true</static><pose>8.0 1.0 0.5 0 0 0</pose>
+      <link name="l"><visual name="v"><geometry><box><size>0.08 0.12 1.0</size></box></geometry>
+        <material><ambient>0.45 0.28 0.1 1</ambient><diffuse>0.45 0.28 0.1 1</diffuse></material></visual></link></model>
+
+    <!-- ==================== Pluto Robot (SDF native) ==================== -->
+    <model name="pluto">
+      <pose>0.5 0 0.07 0 0 0</pose>
+
+      <!-- Base link -->
+      <link name="base_footprint">
+        <inertial><mass>0.001</mass><inertia><ixx>0.0000001</ixx><iyy>0.0000001</iyy><izz>0.0000001</izz></inertia></inertial>
+      </link>
+
+      <link name="base_link">
+        <pose>0 0 0.07 0 0 0</pose>
+        <inertial><mass>10.0</mass>
+          <inertia><ixx>0.35</ixx><iyy>0.35</iyy><izz>0.12</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <!-- Main cylinder body -->
+        <visual name="body">
+          <pose>0 0 0.30 0 0 0</pose>
+          <geometry><cylinder><radius>0.15</radius><length>0.60</length></cylinder></geometry>
+          <material><ambient>0.28 0.30 0.33 1</ambient><diffuse>0.28 0.30 0.33 1</diffuse></material>
+        </visual>
+        <collision name="body_col">
+          <pose>0 0 0.30 0 0 0</pose>
+          <geometry><cylinder><radius>0.15</radius><length>0.60</length></cylinder></geometry>
+        </collision>
+        <!-- Head sphere -->
+        <visual name="head">
+          <pose>0 0 0.665 0 0 0</pose>
+          <geometry><sphere><radius>0.13</radius></sphere></geometry>
+          <material><ambient>0.70 0.73 0.78 1</ambient><diffuse>0.70 0.73 0.78 1</diffuse></material>
+        </visual>
+        <!-- Left horn -->
+        <visual name="horn_l">
+          <pose>-0.05 0.06 0.82 0 -0.35 0.52</pose>
+          <geometry><cylinder><radius>0.022</radius><length>0.25</length></cylinder></geometry>
+          <material><ambient>0.2 0.22 0.25 1</ambient></material>
+        </visual>
+        <!-- Right horn -->
+        <visual name="horn_r">
+          <pose>-0.05 -0.06 0.82 0 -0.35 -0.52</pose>
+          <geometry><cylinder><radius>0.022</radius><length>0.25</length></cylinder></geometry>
+          <material><ambient>0.2 0.22 0.25 1</ambient></material>
+        </visual>
+        <!-- Left eye (blue) -->
+        <visual name="eye_l">
+          <pose>0.10 0.05 0.67 0 0 0</pose>
+          <geometry><sphere><radius>0.024</radius></sphere></geometry>
+          <material><ambient>0.0 0.5 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse><emissive>0.0 0.3 0.8 1</emissive></material>
+        </visual>
+        <!-- Right eye (blue) -->
+        <visual name="eye_r">
+          <pose>0.10 -0.05 0.67 0 0 0</pose>
+          <geometry><sphere><radius>0.024</radius></sphere></geometry>
+          <material><ambient>0.0 0.5 1.0 1</ambient><diffuse>0.0 0.5 1.0 1</diffuse><emissive>0.0 0.3 0.8 1</emissive></material>
+        </visual>
+        <!-- Chest panel (dark blue) -->
+        <visual name="chest">
+          <pose>0.155 0 0.30 0 0 0</pose>
+          <geometry><box><size>0.01 0.22 0.18</size></box></geometry>
+          <material><ambient>0.05 0.15 0.40 1</ambient><diffuse>0.05 0.15 0.40 1</diffuse><emissive>0.0 0.05 0.15 1</emissive></material>
+        </visual>
+
+        <!-- LiDAR sensor on left horn tip -->
+        <sensor name="lidar" type="gpu_lidar">
+          <pose>-0.05 0.06 0.95 0 0 0</pose>
+          <topic>scan</topic>
+          <update_rate>10</update_rate>
+          <visualize>false</visualize>
+          <lidar>
+            <scan>
+              <horizontal>
+                <samples>360</samples>
+                <resolution>1</resolution>
+                <min_angle>-3.14159</min_angle>
+                <max_angle>3.14159</max_angle>
+              </horizontal>
+            </scan>
+            <range>
+              <min>0.12</min>
+              <max>12.0</max>
+              <resolution>0.01</resolution>
+            </range>
+            <noise><type>gaussian</type><mean>0</mean><stddev>0.01</stddev></noise>
+          </lidar>
+        </sensor>
+
+        <!-- IMU -->
+        <sensor name="imu_sensor" type="imu">
+          <always_on>true</always_on>
+          <update_rate>100</update_rate>
+          <topic>imu</topic>
+        </sensor>
+      </link>
+
+      <!-- Left wheel -->
+      <link name="left_wheel">
+        <pose>0 0.17 0.07 1.5707963 0 0</pose>
+        <inertial><mass>0.8</mass>
+          <inertia><ixx>0.002</ixx><iyy>0.002</iyy><izz>0.004</izz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.07</radius><length>0.04</length></cylinder></geometry>
+          <material><ambient>0.12 0.12 0.12 1</ambient><diffuse>0.12 0.12 0.12 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.07</radius><length>0.04</length></cylinder></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+      </link>
+
+      <!-- Right wheel -->
+      <link name="right_wheel">
+        <pose>0 -0.17 0.07 1.5707963 0 0</pose>
+        <inertial><mass>0.8</mass>
+          <inertia><ixx>0.002</ixx><iyy>0.002</iyy><izz>0.004</izz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><cylinder><radius>0.07</radius><length>0.04</length></cylinder></geometry>
+          <material><ambient>0.12 0.12 0.12 1</ambient><diffuse>0.12 0.12 0.12 1</diffuse></material>
+        </visual>
+        <collision name="c">
+          <geometry><cylinder><radius>0.07</radius><length>0.04</length></cylinder></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+      </link>
+
+      <!-- Caster -->
+      <link name="caster">
+        <pose>-0.11 0 0.035 0 0 0</pose>
+        <inertial><mass>0.2</mass>
+          <inertia><ixx>0.0003</ixx><iyy>0.0003</iyy><izz>0.0003</izz></inertia>
+        </inertial>
+        <visual name="v">
+          <geometry><sphere><radius>0.035</radius></sphere></geometry>
+          <material><ambient>0.12 0.12 0.12 1</ambient></material>
+        </visual>
+        <collision name="c">
+          <geometry><sphere><radius>0.035</radius></sphere></geometry>
+          <surface><friction><ode><mu>0.0</mu><mu2>0.0</mu2></ode></friction></surface>
+        </collision>
+      </link>
+
+      <!-- Joints -->
+      <joint name="base_joint" type="fixed">
+        <parent>base_footprint</parent><child>base_link</child>
+      </joint>
+      <joint name="left_wheel_joint" type="revolute">
+        <parent>base_link</parent><child>left_wheel</child>
+        <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+      </joint>
+      <joint name="right_wheel_joint" type="revolute">
+        <parent>base_link</parent><child>right_wheel</child>
+        <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+      </joint>
+      <joint name="caster_joint" type="ball">
+        <parent>base_link</parent><child>caster</child>
+      </joint>
+
+      <!-- ===== Gazebo Harmonic Plugins ===== -->
+      <!-- Differential drive -->
+      <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+        <left_joint>left_wheel_joint</left_joint>
+        <right_joint>right_wheel_joint</right_joint>
+        <wheel_separation>0.34</wheel_separation>
+        <wheel_radius>0.07</wheel_radius>
+        <odom_publish_frequency>10</odom_publish_frequency>
+        <topic>cmd_vel</topic>
+        <odom_topic>odom</odom_topic>
+        <tf_topic>tf</tf_topic>
+        <frame_id>odom</frame_id>
+        <child_frame_id>base_footprint</child_frame_id>
+      </plugin>
+
+      <!-- Joint state publisher -->
+      <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+        <topic>joint_states</topic>
+      </plugin>
+
+    </model>
+
+  </world>
+</sdf>
