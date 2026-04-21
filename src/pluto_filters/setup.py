@@ -33,6 +33,7 @@ setup(
             'motion_model_node = pluto_filters.motion_models.velocity_motion_model:main',
             'beam_model_node = pluto_filters.measurement_models.beam_model:main',
             'likelihood_field_node = pluto_filters.measurement_models.likelihood_field:main',
+            'lio_2d_node = pluto_filters.ieskf_lio.lio_2d:main',
         ],
     },
 )
