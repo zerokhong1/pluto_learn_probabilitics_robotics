@@ -277,11 +277,11 @@
       </joint>
       <joint name="left_wheel_joint" type="revolute">
         <parent>base_link</parent><child>left_wheel</child>
-        <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+        <axis><xyz>0 0 -1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
       </joint>
       <joint name="right_wheel_joint" type="revolute">
         <parent>base_link</parent><child>right_wheel</child>
-        <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
+        <axis><xyz>0 0 -1</xyz><limit><lower>-1e16</lower><upper>1e16</upper></limit></axis>
       </joint>
       <joint name="caster_joint" type="ball">
         <parent>base_link</parent><child>caster</child>
