@@ -46,13 +46,10 @@ def test_linear_system_matches_kf():
     z = np.array([0.5])   # measured x = 0.5
     R = np.eye(1) * 0.01
 
-    def z_func(pose_j, bias_j):
-        return np.array([pose_j[0, 2]]) - z  # residual = estimate - measurement
+    def zh_func(pose_j, bias_j):
+        return np.array([pose_j[0, 2]]) - z, H
 
-    def H_func(pose_j, bias_j):
-        return H
-
-    ieskf.update(z_func, H_func, R, max_iter=1)
+    ieskf.update(zh_func, R, max_iter=1)
 
     # Standard KF: state = zeros (flat Euclidean approx)
     x0 = np.zeros(6)
@@ -77,14 +74,11 @@ def test_pose_update_wraps_angle():
     H = np.zeros((1, 6)); H[0, 2] = 1.0
     R = np.eye(1) * 0.001
 
-    def z_func(pose_j, _):
+    def zh_func(pose_j, _):
         yaw_est = np.arctan2(pose_j[1, 0], pose_j[0, 0])
-        return np.array([yaw_est - 3.3])   # measurement says 3.3 rad
+        return np.array([yaw_est - 3.3]), H
 
-    def H_func(pose_j, _):
-        return H
-
-    ieskf.update(z_func, H_func, R, max_iter=5)
+    ieskf.update(zh_func, R, max_iter=5)
     yaw = np.arctan2(ieskf.pose[1, 0], ieskf.pose[0, 0])
     assert -np.pi <= yaw <= np.pi, f"Yaw {yaw:.4f} out of range after update"
     assert not np.any(np.isnan(ieskf.pose)), "NaN in pose after update"
@@ -109,8 +103,7 @@ def test_convergence_moves_toward_measurement():
     dist_before = np.sqrt(x_before**2 + y_before**2)
 
     ieskf.update(
-        lambda p, b: np.array([p[0, 2], p[1, 2]]) - z_true,
-        lambda p, b: H,
+        lambda p, b: (np.array([p[0, 2], p[1, 2]]) - z_true, H),
         V, max_iter=5,
     )
 

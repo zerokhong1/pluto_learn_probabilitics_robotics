@@ -128,21 +128,16 @@ def run_ieskf(map_pts, gt_poses, imu_seq, lidar_seq):
         if lidar_seq and abs(lidar_seq[0][0] - t) < DT_IMU / 2:
             _, scan = lidar_seq.pop(0)
 
-            def z_fn(pj, _):
-                z, _, ok = sm.compute_residuals_and_jacobians(scan, pj)
-                return z if ok else np.array([])
+            def zh_fn(pj, _, _s=scan):
+                z, H3, ok = sm.compute_residuals_and_jacobians(_s, pj)
+                if not ok:
+                    return np.array([]), np.zeros((0, 6))
+                H6 = np.zeros((H3.shape[0], 6)); H6[:, :3] = H3
+                return z, H6
 
-            def H_fn(pj, _):
-                _, H3, ok = sm.compute_residuals_and_jacobians(scan, pj)
-                if not ok: return np.zeros((0, 6))
-                m = H3.shape[0]
-                H6 = np.zeros((m, 6)); H6[:, :3] = H3
-                return H6
-
-            z_p = z_fn(kf.pose, kf.bias)
+            z_p, _ = zh_fn(kf.pose, kf.bias)
             if z_p.size > 0:
-                V = np.eye(len(z_p)) * SIGMA_SCAN**2
-                kf.update(z_fn, H_fn, V, max_iter=5)
+                kf.update(zh_fn, np.eye(1) * SIGMA_SCAN**2, max_iter=5)
 
             world_pts = ScanMatcher.transform_points(scan, kf.pose)
             sm.add_to_map(world_pts)

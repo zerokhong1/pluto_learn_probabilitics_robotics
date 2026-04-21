@@ -67,16 +67,18 @@ class IESKF:
 
     # ── iterated update ────────────────────────────────────────────────────
 
-    def update(self, z_func, H_func, V: np.ndarray,
+    def update(self, zh_func, V: np.ndarray,
                max_iter: int = 5, eps: float = 1e-4):
         """Iterated update step. Paper eq. (20a-b).
 
         Args:
-            z_func: callable(pose_j, bias_j) -> np.ndarray (m,).
-                    Computes residual vector at current linearization point.
-            H_func: callable(pose_j, bias_j) -> np.ndarray (m, error_dim).
-                    Measurement Jacobian at current linearization point.
-            V:      (m × m) measurement noise covariance.
+            zh_func: callable(pose_j, bias_j) -> (z, H) where
+                     z: np.ndarray (m,)  residual vector
+                     H: np.ndarray (m, error_dim)  measurement Jacobian
+                     Both computed at the same linearization point so
+                     shapes always match.
+            V:      (m × m) measurement noise covariance (will be resized
+                    to match m from zh_func if V is a scalar or (1,1)).
             max_iter: maximum IESKF iterations.
             eps:    convergence threshold on ‖x_{j+1} ⊖ x_j‖.
 
@@ -96,10 +98,13 @@ class IESKF:
         K_j = None  # keep for final covariance update
 
         for _ in range(max_iter):
-            z_j = z_func(pose_j, bias_j)
+            z_j, H_j = zh_func(pose_j, bias_j)
             if z_j.size == 0:
                 break
-            H_j = H_func(pose_j, bias_j)
+
+            # Rebuild V if shape changed (number of correspondences varies)
+            sigma2 = V[0, 0] if V.ndim == 2 else float(V)
+            V_j = np.eye(len(z_j)) * sigma2
 
             # Transport Jacobian J_j = Jr_inv(x_j ⊖ x̂)  — SE(2) part only
             # For the composite manifold, extend to full error_dim
@@ -111,7 +116,7 @@ class IESKF:
             P_j = J_inv @ self.P @ J_inv.T
 
             # Kalman gain (eq. 20a)
-            S = H_j @ P_j @ H_j.T + V
+            S = H_j @ P_j @ H_j.T + V_j
             K_j = P_j @ H_j.T @ np.linalg.solve(S, np.eye(S.shape[0]))
 
             # State update (eq. 20b)
@@ -133,4 +138,4 @@ class IESKF:
         # Covariance update (Joseph form for numerical stability)
         if K_j is not None and z_j.size > 0:
             IKH = np.eye(self.error_dim) - K_j @ H_j
-            self.P = IKH @ self.P @ IKH.T + K_j @ V @ K_j.T
+            self.P = IKH @ self.P @ IKH.T + K_j @ V_j @ K_j.T

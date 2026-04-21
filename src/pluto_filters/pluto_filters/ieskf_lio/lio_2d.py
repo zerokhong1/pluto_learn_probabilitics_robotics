@@ -228,27 +228,23 @@ class LIO2D(Node):
         matcher = self.matcher
         sigma   = self._sigma_scan
 
-        def z_func(pose_j, bias_j):
-            z, _, ok = matcher.compute_residuals_and_jacobians(scan_ds, pose_j)
-            return z if ok else np.array([])
-
-        def H_func(pose_j, bias_j):
-            _, H_se2, ok = matcher.compute_residuals_and_jacobians(scan_ds, pose_j)
+        def zh_func(pose_j, bias_j):
+            z, H_se2, ok = matcher.compute_residuals_and_jacobians(scan_ds, pose_j)
             if not ok:
-                return np.zeros((0, self._ERR_DIM))
+                return np.array([]), np.zeros((0, self._ERR_DIM))
             m = H_se2.shape[0]
             H_full = np.zeros((m, self._ERR_DIM))
-            H_full[:, :3] = H_se2   # pose columns; vel+bias columns = 0
-            return H_full
+            H_full[:, :3] = H_se2
+            return z, H_full
 
-        # Measurement noise: estimated per update (needs a probe call)
-        z_probe = z_func(self.kf.pose, self.kf.bias)
+        # Probe once to check if there are correspondences
+        z_probe, _ = zh_func(self.kf.pose, self.kf.bias)
         if z_probe.size == 0:
             return
-        V = np.eye(len(z_probe)) * sigma**2
+        V = np.eye(1) * sigma**2   # scalar sigma; IESKF resizes per iteration
 
         # 5. IESKF iterated update
-        self.kf.update(z_func, H_func, V, self._max_iter, self._eps)
+        self.kf.update(zh_func, V, self._max_iter, self._eps)
 
         # 6. Add frame to map (world frame)
         world_pts = ScanMatcher.transform_points(scan_ds, self.kf.pose)
