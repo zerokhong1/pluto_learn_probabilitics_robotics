@@ -1,0 +1,90 @@
+da_ieskf:
+  # ── Degeneracy Detection ─────────────────────────────────────────────────
+  degeneracy:
+    # Eigenvalue ratio threshold: lambda_min / lambda_max < thresh → degenerate
+    # 0.15 from Python sim (same thresh that reproduced paper results)
+    eigenvalue_threshold: 0.15
+
+    # Covariance inflation scale along degenerate eigenvectors
+    # P += alpha * v_i * v_i^T for each degenerate direction
+    # Large alpha → loop closure dominates; too large → unstable
+    inflation_alpha: 100.0
+
+    # Enable/disable degeneracy inflation (set false for IESKF baseline)
+    enabled: true
+
+    # Log eigenvalues to CSV for paper figures
+    log_eigenvalues: true
+    log_path: "/tmp/da_ieskf_eigenvalues.csv"
+
+  # ── IESKF ────────────────────────────────────────────────────────────────
+  ieskf:
+    # Max iterations per LiDAR scan
+    max_iter: 5
+
+    # Convergence threshold (norm of state increment)
+    convergence_eps: 1.0e-4
+
+    # Initial covariance diagonal (SGal(3) error state: ρ, ν, θ, ι)
+    # [rho_x, rho_y, rho_z, nu_x, nu_y, nu_z, theta_x, theta_y, theta_z, iota]
+    P0_diag: [0.01, 0.01, 0.01,
+              0.01, 0.01, 0.01,
+              0.01, 0.01, 0.01,
+              0.01]
+
+    # IMU process noise (continuous-time spectral densities)
+    sigma_gyro:  0.005    # rad/s/sqrt(Hz)
+    sigma_accel: 0.05     # m/s²/sqrt(Hz)
+
+    # Gyro/accel bias random walk
+    sigma_bg:    1.0e-4   # rad/s²/sqrt(Hz)
+    sigma_ba:    1.0e-3   # m/s³/sqrt(Hz)
+
+    # Point-to-plane LiDAR noise
+    sigma_lidar: 0.05     # meters
+
+  # ── Loop Closure ─────────────────────────────────────────────────────────
+  loop_closure:
+    enabled: true
+
+    # Scan Context parameters
+    scan_context:
+      n_ring:    20
+      n_sector:  60
+      max_radius: 80.0    # meters
+      # SC distance threshold for candidate proposal
+      dist_threshold: 0.15
+      # Number of top candidates to verify with GICP
+      n_candidates: 3
+      # Minimum keyframe gap before proposing loop
+      min_keyframe_gap: 50
+
+    # GICP alignment
+    gicp:
+      max_correspondence_dist: 1.0   # meters
+      max_iterations:          50
+      fitness_threshold:       0.3   # reject if fitness > this
+
+    # Pose graph optimization
+    pose_graph:
+      lm_max_iter: 100
+      lm_rel_tol:  1.0e-5
+      verbose:     false
+
+  # ── Keyframe selection ───────────────────────────────────────────────────
+  keyframe:
+    # Add keyframe if translation > min_dist OR rotation > min_rot
+    min_dist_m:    0.5    # meters
+    min_rot_rad:   0.1    # radians (~6 degrees)
+
+  # ── Map (i-Octree) ────────────────────────────────────────────────────────
+  map:
+    # After loop closure, rebuild map for keyframes within this window
+    # (full rebuild is too slow; partial is a trade-off)
+    correction_window: 200   # keyframes
+
+  # ── Evaluation / output ──────────────────────────────────────────────────
+  output:
+    tum_path:        "/tmp/da_ieskf_traj.tum"
+    eigenvalue_path: "/tmp/da_ieskf_eigenvalues.csv"
+    loop_closure_log: "/tmp/da_ieskf_loops.csv"
