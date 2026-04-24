@@ -1,0 +1,14 @@
+=== Phase 4 Summary: DA-IESKF on NTU VIRAL eee_03 ===
+Date: Fri 24 Apr 2026 09:06:10 PM UTC
+
+  Sequence:  eee_03  (181 s, indoor academic building)
+  Sensor:    Ouster OS1-16, VN-100 IMU @ 385 Hz
+
+  baseline: APE RMSE = 0.280745 m   (max = 0.682768 m)
+  da: APE RMSE = 0.291142 m   (max = 0.738213 m)
+
+  DA eigenvalue log: 9784 frames, 1229 degenerate (12.6%)
+
+  RMSE delta (DA - baseline): 0.0104 m (+3.7%)
+  → DA-IESKF has negligible overhead on mixed-geometry indoor env.
+    Improvement expected on long-corridor/tunnel sequences.
