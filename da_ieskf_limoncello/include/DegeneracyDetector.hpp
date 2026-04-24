@@ -3,6 +3,8 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <numeric>
+#include <fstream>
+#include <string>
 
 /**
  * DegeneracyDetector — Hessian eigenvalue analysis for IESKF degenerate direction
@@ -97,17 +99,59 @@ public:
     }
 
     /**
+     * Analyse a pre-computed information matrix block (HTH / R) directly.
+     * More convenient when H^T H is already computed by the IESKF loop.
+     *
+     * @param info_block  pose_dim × pose_dim information matrix (e.g. H[:,:3]^T H[:,:3] / R)
+     * @return            DegeneracyResult
+     */
+    DegeneracyResult analyse_info(const Eigen::MatrixXd& info_block) const {
+        Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(info_block);
+        Eigen::VectorXd eigenvalues  = eig.eigenvalues();   // ascending
+        Eigen::MatrixXd eigenvectors = eig.eigenvectors();
+
+        double lambda_max = eigenvalues.maxCoeff();
+        double lambda_min = eigenvalues.minCoeff();
+        double ratio = (lambda_max > 1e-12) ? lambda_min / lambda_max : 0.0;
+
+        int actual_pose_dim = static_cast<int>(info_block.rows());
+
+        DegeneracyResult res;
+        res.is_degenerate    = ratio < thresh_;
+        res.min_eigenvalue   = lambda_min;
+        res.eigenvalue_ratio = ratio;
+        res.n_degenerate_dims = 0;
+
+        std::vector<Eigen::VectorXd> deg_dirs;
+        for (int i = 0; i < actual_pose_dim; ++i) {
+            double ev_ratio = (lambda_max > 1e-12) ? eigenvalues(i) / lambda_max : 0.0;
+            if (ev_ratio < thresh_) {
+                Eigen::VectorXd full_dir = Eigen::VectorXd::Zero(state_dim_);
+                full_dir.head(actual_pose_dim) = eigenvectors.col(i);
+                deg_dirs.push_back(full_dir);
+                res.n_degenerate_dims++;
+            }
+        }
+        if (!deg_dirs.empty()) {
+            res.degenerate_dirs.resize(state_dim_ * static_cast<int>(deg_dirs.size()));
+            for (int i = 0; i < static_cast<int>(deg_dirs.size()); ++i)
+                res.degenerate_dirs.segment(i * state_dim_, state_dim_) = deg_dirs[i];
+        }
+        return res;
+    }
+
+    /**
      * Inflate the filter covariance P along degenerate directions.
      *
      * P_out = P + alpha * Σ_i v_i v_i^T   (sum over degenerate eigenvectors)
      *
-     * This makes Ω = P^{-1} smaller along degenerate axes, allowing loop
-     * closure to dominate over odometry in those directions.
+     * Accepts both fixed-size (e.g. Matrix<double,24,24>) and dynamic MatrixXd.
      *
-     * @param P      state covariance (state_dim × state_dim), modified in place
-     * @param result DegeneracyResult from analyse()
+     * @param P      state covariance, modified in place
+     * @param result DegeneracyResult from analyse() or analyse_info()
      */
-    void inflate(Eigen::MatrixXd& P, const DegeneracyResult& result) const {
+    template<typename Derived>
+    void inflate(Eigen::MatrixBase<Derived>& P, const DegeneracyResult& result) const {
         if (!result.is_degenerate || result.n_degenerate_dims == 0) return;
 
         for (int i = 0; i < result.n_degenerate_dims; ++i) {
