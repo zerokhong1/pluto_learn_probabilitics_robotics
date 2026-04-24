@@ -69,7 +69,12 @@ public:
 
         double lambda_max = eigenvalues.maxCoeff();
         double lambda_min = eigenvalues.minCoeff();
-        double ratio = (lambda_max > 1e-12) ? lambda_min / lambda_max : 0.0;
+
+        if (lambda_max < 1e-6) {
+            return {false, 0.0, 1.0, Eigen::VectorXd{}, 0};
+        }
+
+        double ratio = lambda_min / lambda_max;
 
         DegeneracyResult res;
         res.is_degenerate    = ratio < thresh_;
@@ -112,7 +117,15 @@ public:
 
         double lambda_max = eigenvalues.maxCoeff();
         double lambda_min = eigenvalues.minCoeff();
-        double ratio = (lambda_max > 1e-12) ? lambda_min / lambda_max : 0.0;
+
+        // No plane observations (empty/sparse map): H^T H ≈ 0.
+        // IESKF gain is already ~0 in this case — inflation is a no-op and
+        // would incorrectly flag initialization frames as degenerate.
+        if (lambda_max < 1e-6) {
+            return {false, 0.0, 1.0, Eigen::VectorXd{}, 0};
+        }
+
+        double ratio = lambda_min / lambda_max;
 
         int actual_pose_dim = static_cast<int>(info_block.rows());
 
