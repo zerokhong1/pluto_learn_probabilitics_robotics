@@ -141,7 +141,7 @@ for label in baseline da; do
         continue
     fi
 
-    export PATH="$HOME/.local/bin:$PATH"
+    rm -f "$RESULTS/evo_${label}.zip"
     evo_ape tum "$GT" "$TUM" \
         --align --correct_scale \
         --save_results "$RESULTS/evo_${label}.zip" \
@@ -163,9 +163,9 @@ done
     done
     echo ""
     if [ -f "$RESULTS/eigenvalues_da.csv" ]; then
-        N_ROWS=$(wc -l < "$RESULTS/eigenvalues_da.csv")
-        N_DEG=$(grep -c ",1," "$RESULTS/eigenvalues_da.csv" 2>/dev/null || echo 0)
-        echo "  DA eigenvalue log: $N_ROWS rows, $N_DEG degenerate frames"
+        N_ROWS=$(( $(wc -l < "$RESULTS/eigenvalues_da.csv") - 1 ))
+        N_DEG=$(awk -F',' 'NR>1 && $3=="1"' "$RESULTS/eigenvalues_da.csv" | wc -l)
+        echo "  DA eigenvalue log: $N_ROWS frames, $N_DEG degenerate"
     fi
 } | tee "$RESULTS/summary.txt"
 
