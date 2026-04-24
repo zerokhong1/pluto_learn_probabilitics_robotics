@@ -1,0 +1,106 @@
+/**:
+  ros__parameters:
+    topics:
+      input:
+        lidar: /points
+        imu: /imu/data
+        stop_ioctree_update: /stop
+      output:
+        state: state
+        frame: full_pcl
+      frame_id: map
+
+    verbose: true
+    debug: false
+
+    sensors:
+      lidar:
+        type: 1       # VELODYNE — standard PointCloud2 via pcl::fromROSMsg
+                      # PointT.time = float (seconds since start of sweep)
+        end_of_sweep: false
+      imu:
+        hz: 200
+
+      calibration:
+        gravity_align: false
+        accel: false
+        gyro: false
+        time: 0.0     # no calibration — start processing immediately
+
+      time_offset: false
+
+      extrinsics:
+        imu2baselink:
+          t: [0., 0., 0.]
+          R: [0., 0., 0.]    # identity (roll, pitch, yaw degrees)
+
+        lidar2baselink:
+          t: [0., 0., 0.]
+          R: [0., 0., 0.]
+
+      intrinsics:
+        accel_bias: [0., 0., 0.]
+        gyro_bias:  [0., 0., 0.]
+        sm: [1., 0., 0.,
+             0., 1., 0.,
+             0., 0., 1.]
+
+      extrinsics:
+        gravity: 9.81
+
+    filters:
+      voxel_grid:
+        leaf_size: [0.1, 0.1, 0.1]   # 10cm voxel → fewer points → faster smoke test
+
+      min_distance:
+        active: false
+        value: 0.1
+
+      crop_box:
+        active: false
+        min: [-100., -100., -100.]
+        max: [ 100.,  100.,  100.]
+
+      fov:
+        active: false
+        value: 360.
+
+      rate_sampling:
+        active: false
+        value: 1
+
+    IKFoM:
+      max_iters: 3
+      tolerance: 0.001
+      lidar_noise: 0.001
+      estimate_extrinsics: false
+
+      covariance:
+        gyro: 5.0e-3
+        accel: 6.0e-2
+        bias_gyro: 3.0e-6
+        bias_accel: 8.0e-5
+        initial_cov: [
+          0.01,   # position
+          0.01,   # rotation
+          0.1,    # velocity
+          0.01,   # accel bias
+          0.01,   # gyro bias
+          0.01    # gravity
+        ]
+
+      plane:
+        points: 5
+        max_sqrt_dist: 2.0
+        plane_threshold: 0.1
+
+      # DA-IESKF — toggled by run_smoke_test.sh via sed
+      da_ieskf_enabled: false
+      da_eigenvalue_threshold: 0.15
+      da_inflation_alpha: 100.0
+      da_eigenvalue_log: ""
+
+    iOctree:
+      min_extent: 0.2
+      bucket_size: 4
+      downsample: true
