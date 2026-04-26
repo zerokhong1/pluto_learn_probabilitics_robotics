@@ -1,0 +1,102 @@
+/**:
+  ros__parameters:
+    topics:
+      input:
+        lidar: /os1_cloud_node1/points
+        imu:   /imu/imu
+        stop_ioctree_update: /stop
+      output:
+        state: state
+        frame: full_pcl
+      frame_id: map
+
+    verbose: false
+    debug: false
+
+    sensors:
+      lidar:
+        type: 0 #  0: OUSTER
+        end_of_sweep: false
+      imu:
+        hz: 400  # VN100 IMU at ~385 Hz
+
+      calibration:
+        gravity_align: false
+        accel: true
+        gyro: true
+        time: 1.0
+
+      time_offset: false
+
+      extrinsics:
+        imu2baselink:
+          t: [0., 0., 0.]
+          R: [0., 0., 0.]  # T_Body_IMU = identity
+
+        lidar2baselink:
+          # T_Body_Lidar1: identity rotation, t=(-0.050, 0.000, 0.055)
+          t: [-0.050, 0.000, 0.055]
+          R: [0., 0., 0.]
+
+      intrinsics:
+        accel_bias: [ 0.0001, 0.0001, 0.0001 ]
+        gyro_bias:  [ 0.0001, 0.0001, 0.0001 ]
+        sm: [ 1.,  0.,  0.,
+              0.,  1.,  0.,
+              0.,  0.,  1. ]
+
+    filters:
+      voxel_grid:
+        leaf_size: [ 0.3, 0.3, 0.3 ]
+
+      min_distance:
+        active: true
+        value: 1.5
+
+      crop_box:
+        active: false
+        min: [0., 0., 0.]
+        max: [0., 0., 0.]
+
+      fov:
+        active: false
+        value: 180.
+
+      rate_sampling:
+        active: false
+        value: 2
+
+    IKFoM:
+      max_iters: 5
+      tolerance: 0.001
+      lidar_noise: 0.001
+      estimate_extrinsics: false
+
+      covariance:
+        gyro: 3.67e-4
+        accel: 3.65e-2
+        bias_gyro: 2.66e-5
+        bias_accel: 4.33e-4
+        initial_cov: [
+          0.01,
+          0.01,
+          0.1,
+          0.01,
+          0.01,
+          0.01
+        ]
+
+      plane:
+        points: 5
+        max_sqrt_dist: 1.0
+        plane_threshold: 0.1
+
+      da_ieskf_enabled: false
+      da_eigenvalue_threshold: 0.15
+      da_inflation_alpha: 100.0
+      da_eigenvalue_log: ""
+
+    iOctree:
+      min_extent: 0.2
+      bucket_size: 4
+      downsample: true
